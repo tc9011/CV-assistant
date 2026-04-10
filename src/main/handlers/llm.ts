@@ -115,7 +115,7 @@ export function registerLlmHandlers(ipcMain: IpcMainLike, mainWindow: BrowserWin
     ): Promise<{ success: true; model: DownloadedModel } | IpcErrorResponse> => {
       if (isMas()) return MAS_ERROR
 
-      const args = rawArgs as { modelId: string }
+      const args = rawArgs as { modelId: string; mirrorUrl?: string }
       const modelInfo = AVAILABLE_MODELS.find((m: LocalModelInfo): boolean => m.id === args.modelId)
       if (!modelInfo) {
         return { success: false, error: `Unknown model: ${args.modelId}` }
@@ -126,7 +126,7 @@ export function registerLlmHandlers(ipcMain: IpcMainLike, mainWindow: BrowserWin
           mainWindow.webContents.send('llm:downloadProgress', progress)
         }
 
-        const { promise, abort } = downloadModel(modelInfo, onProgress)
+        const { promise, abort } = downloadModel(modelInfo, onProgress, args.mirrorUrl)
         activeDownloadAbort = abort
 
         const model = await promise

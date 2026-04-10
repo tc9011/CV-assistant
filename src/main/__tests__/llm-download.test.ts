@@ -202,6 +202,43 @@ describe('llm/download', (): void => {
       expect(mockRename).toHaveBeenCalled()
     })
 
+    it('uses official HuggingFace URL when mirrorUrl is not provided', async (): Promise<void> => {
+      const modelInfo = AVAILABLE_MODELS[0]
+      const body = createMockStream([new Uint8Array([1, 2, 3])])
+
+      mockFetch.mockResolvedValue({
+        ok: true,
+        headers: { get: (): string | null => '3' },
+        body
+      })
+      mockRename.mockResolvedValue(undefined)
+
+      const { promise } = downloadModel(modelInfo, vi.fn())
+      await promise
+
+      const fetchUrl = mockFetch.mock.calls[0][0] as string
+      expect(fetchUrl).toMatch(/^https:\/\/huggingface\.co\//)
+    })
+
+    it('uses mirror URL when provided', async (): Promise<void> => {
+      const modelInfo = AVAILABLE_MODELS[0]
+      const body = createMockStream([new Uint8Array([1, 2, 3])])
+
+      mockFetch.mockResolvedValue({
+        ok: true,
+        headers: { get: (): string | null => '3' },
+        body
+      })
+      mockRename.mockResolvedValue(undefined)
+
+      const { promise } = downloadModel(modelInfo, vi.fn(), 'https://hf-mirror.com')
+      await promise
+
+      const fetchUrl = mockFetch.mock.calls[0][0] as string
+      expect(fetchUrl).toMatch(/^https:\/\/hf-mirror\.com\//)
+      expect(fetchUrl).toContain(`/${modelInfo.repo}/resolve/main/${modelInfo.filename}`)
+    })
+
     it('rejects with checksum error on SHA256 mismatch', async (): Promise<void> => {
       const modelInfo = {
         ...AVAILABLE_MODELS[0],

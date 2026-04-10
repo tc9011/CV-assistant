@@ -10,6 +10,7 @@ export interface AppSettings {
   workspacePath?: string
   autoUpdate?: boolean
   localModelId?: string | null
+  hfMirrorUrl?: string
 }
 
 export interface SettingsContextType {
@@ -28,7 +29,8 @@ const defaultSettings: AppSettings = {
   language: 'en',
   workspacePath: '',
   autoUpdate: true,
-  localModelId: null
+  localModelId: null,
+  hfMirrorUrl: ''
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined)

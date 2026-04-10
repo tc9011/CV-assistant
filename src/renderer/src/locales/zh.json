@@ -155,7 +155,10 @@
     "start_engine": "启动引擎",
     "stop_engine": "停止",
     "model_desc_e2b": "较小模型，推理更快。建议 8GB+ 内存。",
-    "model_desc_e4b": "较大模型，质量更好。建议 16GB+ 内存。"
+    "model_desc_e4b": "较大模型，质量更好。建议 16GB+ 内存。",
+    "hf_mirror_url": "HuggingFace 镜像地址",
+    "hf_mirror_url_ph": "https://hf-mirror.com",
+    "hf_mirror_url_desc": "设置镜像地址以加速模型下载。留空则使用 HuggingFace 官方服务器。"
   },
   "common": {
     "delete": "删除",

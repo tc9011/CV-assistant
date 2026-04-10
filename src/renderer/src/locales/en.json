@@ -155,7 +155,10 @@
     "start_engine": "Start Engine",
     "stop_engine": "Stop",
     "model_desc_e2b": "Smaller model, faster inference. Recommended for 8GB+ RAM.",
-    "model_desc_e4b": "Larger model, better quality. Recommended for 16GB+ RAM."
+    "model_desc_e4b": "Larger model, better quality. Recommended for 16GB+ RAM.",
+    "hf_mirror_url": "HuggingFace Mirror URL",
+    "hf_mirror_url_ph": "https://hf-mirror.com",
+    "hf_mirror_url_desc": "Set a mirror URL for faster model downloads. Leave empty to use the official HuggingFace server."
   },
   "common": {
     "delete": "Delete",

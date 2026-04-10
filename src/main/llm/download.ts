@@ -47,11 +47,12 @@ export async function listDownloadedModels(): Promise<DownloadedModel[]> {
 
 export function downloadModel(
   modelInfo: LocalModelInfo,
-  onProgress: (progress: DownloadProgress) => void
+  onProgress: (progress: DownloadProgress) => void,
+  mirrorUrl?: string
 ): { promise: Promise<DownloadedModel>; abort: AbortController } {
   const abort = new AbortController()
 
-  const promise = executeDownload(modelInfo, onProgress, abort.signal)
+  const promise = executeDownload(modelInfo, onProgress, abort.signal, mirrorUrl)
 
   return { promise, abort }
 }
@@ -59,14 +60,16 @@ export function downloadModel(
 async function executeDownload(
   modelInfo: LocalModelInfo,
   onProgress: (progress: DownloadProgress) => void,
-  signal: AbortSignal
+  signal: AbortSignal,
+  mirrorUrl?: string
 ): Promise<DownloadedModel> {
   const modelsDir = getModelsDir()
   await fs.mkdir(modelsDir, { recursive: true })
 
   const tempPath = path.join(modelsDir, `${modelInfo.filename}.downloading`)
   const finalPath = path.join(modelsDir, modelInfo.filename)
-  const url = `https://huggingface.co/${modelInfo.repo}/resolve/main/${modelInfo.filename}?download=true`
+  const baseUrl = mirrorUrl || 'https://huggingface.co'
+  const url = `${baseUrl}/${modelInfo.repo}/resolve/main/${modelInfo.filename}?download=true`
 
   const response = await fetch(url, { signal, redirect: 'follow' })
 

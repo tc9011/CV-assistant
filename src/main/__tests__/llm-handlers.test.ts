@@ -273,6 +273,36 @@ describe('registerLlmHandlers', () => {
         error: 'Unknown model: nonexistent-model'
       })
     })
+
+    it('passes mirrorUrl to downloadModel when provided', async () => {
+      const downloadedModel: DownloadedModel = {
+        id: 'gemma-4-e2b-it',
+        name: 'gemma-4-e2b-it',
+        displayName: 'Gemma 4 E2B-it',
+        repo: 'ggml-org/gemma-4-E2B-it-GGUF',
+        filename: 'gemma-4-E2B-it-Q8_0.gguf',
+        size: 4_970_000_000,
+        sha256: '0000000000000000000000000000000000000000000000000000000000000000',
+        quantization: 'Q8_0',
+        description: 'Smaller model, faster inference. Recommended for 8GB+ RAM.',
+        path: '/models/gemma-4-E2B-it-Q8_0.gguf',
+        downloadedAt: '2025-01-01T00:00:00.000Z'
+      }
+
+      vi.mocked(downloadMock.downloadModel).mockReturnValue({
+        promise: Promise.resolve(downloadedModel),
+        abort: new AbortController()
+      })
+
+      const handler = getHandler(mockIpcMain, 'llm:downloadModel')
+      await handler(null, { modelId: 'gemma-4-e2b-it', mirrorUrl: 'https://hf-mirror.com' })
+
+      expect(downloadMock.downloadModel).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'gemma-4-e2b-it' }),
+        expect.any(Function),
+        'https://hf-mirror.com'
+      )
+    })
   })
 
   describe('llm:cancelDownload', () => {

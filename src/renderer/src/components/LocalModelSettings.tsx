@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSettings } from '@renderer/context/SettingsContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@renderer/components/ui/card'
 import { Button } from '@renderer/components/ui/button'
 import {
@@ -74,6 +75,7 @@ function formatBytes(bytes: number): string {
 
 export function LocalModelSettings(): React.ReactElement {
   const { t } = useTranslation()
+  const { settings, updateSettings } = useSettings()
   const [models, setModels] = useState<LocalModel[]>([])
   const [engineState, setEngineState] = useState<EngineState>({
     status: 'stopped',
@@ -133,7 +135,11 @@ export function LocalModelSettings(): React.ReactElement {
 
   const handleDownload = async (modelId: string): Promise<void> => {
     setErrorMsg(null)
-    const res = await window.electron.ipcRenderer.invoke('llm:downloadModel', { modelId })
+    const mirrorUrl = settings.hfMirrorUrl?.trim() || undefined
+    const res = await window.electron.ipcRenderer.invoke('llm:downloadModel', {
+      modelId,
+      mirrorUrl
+    })
     if (res.success) {
       setProgresses((prev) => {
         const next = { ...prev }
@@ -240,6 +246,23 @@ export function LocalModelSettings(): React.ReactElement {
             {errorMsg}
           </div>
         )}
+
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium" htmlFor="hf-mirror-url">
+            {t('localLlm.hf_mirror_url')}
+          </label>
+          <input
+            id="hf-mirror-url"
+            type="url"
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            placeholder={t('localLlm.hf_mirror_url_ph')}
+            value={settings.hfMirrorUrl || ''}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>): void => {
+              void updateSettings({ hfMirrorUrl: e.target.value })
+            }}
+          />
+          <p className="text-xs text-muted-foreground">{t('localLlm.hf_mirror_url_desc')}</p>
+        </div>
 
         {models.length === 0 && !errorMsg && (
           <p className="text-sm text-muted-foreground">{t('localLlm.empty_state')}</p>

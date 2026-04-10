@@ -13,6 +13,17 @@ vi.mock('react-i18next', () => ({
   })
 }))
 
+const mockUpdateSettings = vi.fn().mockResolvedValue(undefined)
+
+vi.mock('@renderer/context/SettingsContext', () => ({
+  useSettings: () => ({
+    settings: { hfMirrorUrl: '' },
+    updateSettings: mockUpdateSettings,
+    isLoading: false,
+    error: null
+  })
+}))
+
 const mockModels = [
   {
     id: 'model-1',
@@ -49,6 +60,7 @@ describe('LocalModelSettings', () => {
   beforeEach(() => {
     mockInvoke = vi.fn()
     mockOn = vi.fn()
+    mockUpdateSettings.mockClear()
 
     window.electron = {
       ipcRenderer: {
@@ -183,7 +195,10 @@ describe('LocalModelSettings', () => {
     fireEvent.click(downloadBtn)
 
     await waitFor(() => {
-      expect(mockInvoke).toHaveBeenCalledWith('llm:downloadModel', { modelId: 'model-1' })
+      expect(mockInvoke).toHaveBeenCalledWith('llm:downloadModel', {
+        modelId: 'model-1',
+        mirrorUrl: undefined
+      })
     })
   })
 
@@ -199,5 +214,28 @@ describe('LocalModelSettings', () => {
     await waitFor(() => {
       expect(screen.getByText('localLlm.error_not_available_mas')).toBeInTheDocument()
     })
+  })
+
+  it('10. Renders mirror URL input', async () => {
+    render(<LocalModelSettings />)
+    await waitFor(() => {
+      expect(screen.getByLabelText('localLlm.hf_mirror_url')).toBeInTheDocument()
+    })
+
+    const input = screen.getByLabelText('localLlm.hf_mirror_url') as HTMLInputElement
+    expect(input.value).toBe('')
+    expect(input.placeholder).toBe('localLlm.hf_mirror_url_ph')
+  })
+
+  it('11. Updates settings when mirror URL changes', async () => {
+    render(<LocalModelSettings />)
+    await waitFor(() => {
+      expect(screen.getByLabelText('localLlm.hf_mirror_url')).toBeInTheDocument()
+    })
+
+    const input = screen.getByLabelText('localLlm.hf_mirror_url')
+    fireEvent.change(input, { target: { value: 'https://hf-mirror.com' } })
+
+    expect(mockUpdateSettings).toHaveBeenCalledWith({ hfMirrorUrl: 'https://hf-mirror.com' })
   })
 })
