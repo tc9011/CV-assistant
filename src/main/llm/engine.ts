@@ -4,6 +4,7 @@ import { EventEmitter } from 'node:events'
 import * as childProcess from 'node:child_process'
 import * as net from 'node:net'
 
+import { app } from 'electron'
 import type { ChildProcess } from 'node:child_process'
 
 import type { EngineState } from './types'
@@ -33,8 +34,8 @@ function setEngineState(nextState: EngineState): EngineState {
   return engineState
 }
 
-function isProduction(): boolean {
-  return process.env['NODE_ENV'] === 'production'
+function isPackaged(): boolean {
+  return app.isPackaged
 }
 
 function getBinaryArch(): 'arm64' | 'x86_64' {
@@ -176,7 +177,7 @@ export async function findFreePort(): Promise<number> {
 }
 
 export function getLlamaServerPath(): string {
-  const resourcesPath = isProduction() ? process.resourcesPath : resolveDevResourcesPath()
+  const resourcesPath = isPackaged() ? process.resourcesPath : resolveDevResourcesPath()
   return path.join(resourcesPath, `llama-server-${getBinaryArch()}`)
 }
 
@@ -218,8 +219,7 @@ export async function startEngine(modelId: string, modelPath: string): Promise<E
       ['-m', modelPath, '--host', '127.0.0.1', '--port', String(port), '-ngl', '99', '-c', '8192'],
       {
         stdio: 'ignore',
-        cwd: binaryDir,
-        env: { ...process.env, DYLD_LIBRARY_PATH: binaryDir }
+        cwd: binaryDir
       }
     )
 

@@ -13,6 +13,14 @@ const { mockSpawn, mockCreateServer, mockFetch, mockExistsSync } = vi.hoisted(()
   }
 })
 
+vi.mock('electron', () => {
+  return {
+    app: {
+      isPackaged: false
+    }
+  }
+})
+
 vi.mock('node:child_process', () => {
   return {
     spawn: mockSpawn,
@@ -201,10 +209,7 @@ describe('main/llm/engine', (): void => {
       ],
       expect.objectContaining({
         stdio: 'ignore',
-        cwd: llamaDir,
-        env: expect.objectContaining({
-          DYLD_LIBRARY_PATH: llamaDir
-        })
+        cwd: llamaDir
       })
     )
   })
