@@ -28,8 +28,6 @@ download_arch() {
   local binary_name="llama-server-${arch}"
   local target_path="${TARGET_DIR}/${binary_name}"
 
-  # Check binary AND critical dylibs — if binary exists but dylibs are incomplete
-  # (e.g. from a previous partial or old-version download), force re-download
   if [[ -f "${target_path}" ]]; then
     local missing_dylibs=false
     for critical in libllama libggml libmtmd; do
@@ -86,6 +84,11 @@ download_arch() {
   chmod +x "${target_path}"
 
   # Collect dylibs — flat layout (b8740) or lib/ subdir (older formats)
+  # IMPORTANT: The archive ships versioned symlink chains (e.g. libggml.dylib →
+  # libggml.0.dylib → libggml.0.9.11.dylib). @electron/universal's ASAR merge
+  # fails with EEXIST when recreating these symlinks. We flatten the chain:
+  # copy only the real (non-symlink) dylib and rename it to the soname that the
+  # binary actually loads (the .0.dylib form, matching otool -L output).
   local dylib_source="${extracted_dir}"
   if ! compgen -G "${extracted_dir}/lib*.dylib" > /dev/null 2>&1; then
     if [[ -d "${extracted_dir}/lib" ]]; then
@@ -94,24 +97,28 @@ download_arch() {
   fi
 
   for f in "${dylib_source}/"lib*.dylib; do
-    [[ -e "$f" || -L "$f" ]] || continue
+    [[ -e "$f" ]] || continue
+    # Skip symlinks — we only want the real versioned file
+    [[ -L "$f" ]] && continue
     local base
     base=$(basename "$f")
-    if [[ -e "${TARGET_DIR}/${base}" || -L "${TARGET_DIR}/${base}" ]]; then
+    # Extract soname (the .0.dylib form) from the binary's install name
+    local soname
+    soname=$(otool -D "$f" 2>/dev/null | tail -1 | xargs basename 2>/dev/null || true)
+    if [[ -z "${soname}" || "${soname}" == "${base}" ]]; then
+      # Fallback: if otool fails or returns the same name, use as-is
+      soname="${base}"
+    fi
+    if [[ -e "${TARGET_DIR}/${soname}" ]]; then
       continue
     fi
-    if [[ -L "$f" ]]; then
-      cp -P "$f" "${TARGET_DIR}/"
-    elif [[ -f "$f" ]]; then
-      mv "$f" "${TARGET_DIR}/"
-    fi
+    cp "$f" "${TARGET_DIR}/${soname}"
   done
 
   codesign --force --sign - "${target_path}" 2>/dev/null || echo "Warning: codesign failed for binary (non-fatal)"
   for dylib in "${TARGET_DIR}/"lib*.dylib; do
-    if [[ -f "$dylib" && ! -L "$dylib" ]]; then
-      codesign --force --sign - "$dylib" 2>/dev/null || echo "Warning: codesign failed for $(basename "$dylib") (non-fatal)"
-    fi
+    [[ -f "$dylib" ]] || continue
+    codesign --force --sign - "$dylib" 2>/dev/null || echo "Warning: codesign failed for $(basename "$dylib") (non-fatal)"
   done
 
   rm -rf "${temp_dir}"
