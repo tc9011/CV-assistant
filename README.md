@@ -27,6 +27,7 @@ AI-powered resume/CV assistant desktop app — generate tailored resumes from yo
 - Built-in inference engine (llama.cpp) — no external dependencies required
 - Gemma 4 GGUF models: E2B (~5 GB, 8GB+ RAM) and E4B (~5.3 GB, 16GB+ RAM)
 - One-click model download from HuggingFace in Settings
+- Configurable HuggingFace mirror URL for faster downloads in China (e.g., hf-mirror.com)
 - Managed engine lifecycle: start, stop, health check, crash recovery
 - Generate resumes completely offline after model download
 - macOS (Apple Silicon & Intel); MAS builds gracefully disable this feature

@@ -16,15 +16,16 @@
 
 CV Assistant is a professional desktop application that uses artificial intelligence to generate tailored, high-quality resumes. Combine your personal profile with a job description, and the AI crafts a CV that highlights your most relevant qualifications — then track every application from first resume sent through final offer.
 
-The application supports 12 major AI providers, giving you the flexibility to use your preferred models:
+The application supports 13 major AI providers — including a built-in local LLM — giving you the flexibility to use your preferred models:
 
 - OpenAI, Anthropic, Google Gemini, DeepSeek
-- Ollama (for local models), OpenRouter, Groq
+- Ollama (for local models), Local LLM (Gemma 4, fully offline), OpenRouter, Groq
 - Mistral, Qwen, Zhipu, Kimi, and Custom API endpoints
 
 Key Features:
 
 - **AI-Powered CV Generation**: Automatically draft professional, tailored resumes from your profile and target job requirements. Auto-extract keywords from job descriptions.
+- **Built-in Local LLM**: Download a Gemma 4 model and generate resumes completely offline — no API keys needed. Configurable HuggingFace mirror URL for faster downloads in China.
 - **Job Application Tracker**: Track company, title, salary, and notes for every application. 10-stage interview pipeline from "CV Sent" through "Offer Accepted."
 - **Interview Round Timeline**: Log each interview round with date, result, and Markdown notes on a visual timeline.
 - **PDF Import**: Import your existing resume as a PDF — the AI extracts your profile automatically.
@@ -46,15 +47,16 @@ CV Assistant is built for privacy and performance, ensuring your professional da
 
 简历助手是一款专业的桌面应用程序，利用人工智能生成量身定制的高质量简历。将个人档案与职位描述相结合，AI 会为你打造突出核心优势的简历 — 还能追踪每一次求职，从投递简历到拿到 Offer。
 
-本应用支持 12 家主流 AI 服务商，让您可以灵活选择喜爱的模型：
+本应用支持 13 家主流 AI 服务商（含内置本地大模型），让您可以灵活选择喜爱的模型：
 
 - OpenAI, Anthropic, Google Gemini, DeepSeek
-- Ollama (支持本地模型), OpenRouter, Groq
+- Ollama (支持本地模型), 本地大模型 (Gemma 4, 完全离线), OpenRouter, Groq
 - Mistral, 通义千问 (Qwen), 智谱 AI (Zhipu), Kimi 以及自定义 API 接口
 
 核心功能：
 
 - **AI 智能生成简历**：基于个人档案和目标职位要求，自动生成专业定制简历。智能提取 JD 关键词。
+- **内置本地大模型**：下载 Gemma 4 模型后即可完全离线生成简历，无需 API 密钥。支持配置 HuggingFace 镜像地址加速下载。
 - **求职申请追踪**：记录每次求职的公司、职位、薪资和备注。支持 10 种面试状态，从"已投递"到"已录用"全程追踪。
 - **面试轮次时间线**：逐轮记录面试日期、结果和 Markdown 笔记，可视化展示面试进度。
 - **PDF 导入**：上传已有的 PDF 简历，AI 自动提取个人档案信息。
@@ -75,10 +77,10 @@ CV Assistant is built for privacy and performance, ensuring your professional da
 - **English**: resume,cv,ai,career,job,interview,tracker,builder,editor,markdown,export,pdf,profile
 - **Chinese**: 简历,求职,AI,面试,追踪,简历生成,PDF导出,编辑器,Markdown,职业,求职管理,面试记录
 
-## 5. What's New (v1.5.2)
+## 5. What's New (v1.7.0)
 
-- **English**: New: Refreshed visual design with retro-playful color palette. Collapsible sidebar — full, icon-only, or mobile drawer. Responsive 2-column resume grid with container queries. Improved touch targets and smoother animations. Styled dialog scrollbars with reduced max height to prevent overflow.
-- **Chinese**: 新增：全新复古趣味视觉设计。可折叠侧边栏 — 支持完整、图标和移动端抽屉三种模式。响应式两列简历网格布局。优化触控目标尺寸和动画流畅度。美化弹窗滚动条样式，防止内容溢出。
+- **English**: New: Built-in local LLM — download Gemma 4 and generate resumes completely offline, no API keys needed. One-click model download with configurable HuggingFace mirror URL for faster access in China. Managed engine lifecycle with start, stop, health check, and crash recovery. Now supporting 13 AI providers.
+- **Chinese**: 新增：内置本地大模型 — 下载 Gemma 4 即可完全离线生成简历，无需 API 密钥。一键下载模型，支持配置 HuggingFace 镜像地址加速下载。引擎生命周期管理：启动、停止、健康检查、崩溃恢复。现已支持 13 家 AI 服务商。
 
 ## 6. Support URL
 

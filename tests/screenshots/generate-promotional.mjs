@@ -60,8 +60,8 @@ const CONFIGS = [
     locale: 'en-US',
     name: '06_settings',
     source: 'en-US/06_settings.png',
-    headline: '12 AI Providers Built In',
-    subline: 'Use OpenAI, Anthropic, Gemini, DeepSeek, Ollama, and more',
+    headline: '13 AI Providers Built In',
+    subline: 'Use OpenAI, Anthropic, Gemini, DeepSeek, Local LLM, Ollama, and more',
     badge: 'Your Choice'
   },
   // ---- Chinese ----
@@ -109,8 +109,8 @@ const CONFIGS = [
     locale: 'zh-CN',
     name: '06_settings',
     source: 'zh-CN/06_settings.png',
-    headline: '内置 12 家 AI 服务商',
-    subline: '支持 OpenAI、Anthropic、Gemini、DeepSeek、Ollama 等',
+    headline: '内置 13 家 AI 服务商',
+    subline: '支持 OpenAI、Anthropic、Gemini、DeepSeek、本地大模型、Ollama 等',
     badge: '灵活选择'
   }
 ]

@@ -27,6 +27,7 @@
 - 内置推理引擎（llama.cpp）— 无需安装任何外部依赖
 - Gemma 4 GGUF 模型：E2B（约 5 GB，建议 8GB+ 内存）和 E4B（约 5.3 GB，建议 16GB+ 内存）
 - 在设置中一键下载模型
+- 支持配置 HuggingFace 镜像地址，国内下载更快（如 hf-mirror.com）
 - 引擎生命周期管理：启动、停止、健康检查、崩溃恢复
 - 下载模型后即可完全离线生成简历
 - macOS（Apple Silicon 和 Intel）；Mac App Store 版本中已优雅禁用

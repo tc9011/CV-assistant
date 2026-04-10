@@ -32,7 +32,7 @@ Three process Electron architecture:
 
 - **Main process** (`src/main/`): Electron app lifecycle, BrowserWindow creation, IPC handlers, file system operations. Entry: `src/main/index.ts`. File operations: `src/main/fs.ts`. Legacy migration: `src/main/migration.ts`. Shared utilities: `src/main/utils.ts`.
   - **Handlers** (`src/main/handlers/`): IPC handler modules split by domain. `ai.ts` (AI chat/test + `sanitizeApiError`), `cv.ts` (CV CRUD), `llm.ts` (local LLM IPC: engine start/stop, model download/delete/list), `profile.ts` (profile load/save + PDF extraction), `types.ts` (shared types/interfaces), `index.ts` (barrel export + settings/dialog/workspace/version handlers).
-  - **LLM** (`src/main/llm/`): Local LLM engine and model management. `types.ts` (model definitions + `AVAILABLE_MODELS`), `engine.ts` (llama-server child process lifecycle: spawn, health check, stop, crash recovery), `download.ts` (GGUF model download with progress streaming + cancellation), `index.ts` (barrel exports).
+  - **LLM** (`src/main/llm/`): Local LLM engine and model management. `types.ts` (model definitions + `AVAILABLE_MODELS`), `engine.ts` (llama-server child process lifecycle: spawn, health check, stop, crash recovery), `download.ts` (GGUF model download with progress streaming, cancellation, and optional HuggingFace mirror URL), `index.ts` (barrel exports).
 - **Preload** (`src/preload/`): Context bridge exposing safe IPC APIs to renderer. Do not modify `src/preload/index.ts` or `src/preload/index.d.ts` without updating both.
 - **Renderer** (`src/renderer/src/`): React SPA. Pages in `pages/`, shared components in `components/`, contexts in `context/`, utilities in `lib/`, i18n in `locales/`.
   - **Pages** (`src/renderer/src/pages/`): Page-level components — `Profile.tsx`, `Resumes.tsx`, `Settings.tsx`. Each colocated with its `*.test.tsx`.
@@ -121,7 +121,7 @@ IPC Pattern: All external API calls must go through IPC. Renderer invokes via `w
 - `src/renderer/src/locales/*.json`: always update both en.json and zh.json together.
 - `src/main/handlers/ai.ts`: contains `sanitizeApiError()` — any new IPC handlers that return errors from AI APIs must use this function.
 - `src/main/llm/types.ts`: contains `AVAILABLE_MODELS` — model definitions (repo, filename, size, quantization). Changes here affect download URLs and UI display.
-- `scripts/download-llama-server.sh`: downloads llama-server binary + dylibs. Runs automatically on `npm install` (postinstall) and `npm run build:mac`. Includes idempotent check for binary AND critical dylibs (libllama, libggml, libmtmd).
+- `scripts/download-llama-server.sh`: downloads llama-server binary + dylibs. Runs automatically on `npm install` (postinstall) and `npm run build:mac`. Includes idempotent check for binary AND critical dylibs (libllama, libggml, libmtmd). Dylib symlink chains are flattened to single `.0.dylib` files (soname form) to avoid `@electron/universal` ASAR merge EEXIST errors.
 - `electron-builder.yml`: `extraResources` section bundles `llama-server-*` and `lib*.dylib` into the packaged app. Do not remove these entries.
 - `electron-builder.mas.yml`: MAS-specific build config; do not merge into main `electron-builder.yml`.
 - `build/entitlements.mas.plist` and `build/entitlements.mas.inherit.plist`: MAS sandbox entitlements.
@@ -140,12 +140,14 @@ IPC Pattern: All external API calls must go through IPC. Renderer invokes via `w
 
 - **Engine**: llama-server (llama.cpp b8740) runs as a managed child process in the main process.
 - **Binary delivery**: `scripts/download-llama-server.sh` auto-downloads the correct platform binary on `npm install` (postinstall). For production builds, `npm run build:mac` downloads both arm64 and x86_64 binaries (`--all-arch` flag).
-- **Binary location (dev)**: `resources/llama-server-{arch}` + `resources/lib*.dylib`. All gitignored.
+- **Binary location (dev)**: `resources/llama-server-{arch}` + `resources/lib*.0.dylib`. All gitignored.
 - **Binary location (packaged)**: Bundled via `electron-builder.yml` `extraResources` into `process.resourcesPath`.
 - **Model storage**: GGUF files in `app.getPath('userData')/models/`.
 - **IPC channels**: `llm:listModels`, `llm:downloadModel`, `llm:cancelDownload`, `llm:deleteModel`, `llm:startEngine`, `llm:stopEngine`, `llm:engineStatus`. Download progress sent via `llm:downloadProgress` event.
+- **HuggingFace mirror**: `download.ts` accepts an optional `mirrorUrl` parameter. When set, the download URL base is replaced (e.g., `https://hf-mirror.com` instead of `https://huggingface.co`). The mirror URL is stored in `AppSettings.hfMirrorUrl` and passed from the renderer via `llm:downloadModel` IPC args. The `settingsSchema` uses `.passthrough()` so no schema change is needed.
 - **AI integration**: When provider is `local`, `src/main/index.ts` overrides `baseUrl` to `http://127.0.0.1:{enginePort}/v1`. The `ai.ts` handler's response parser falls back to `reasoning_content` when `content` is empty (Gemma 4 thinking model behavior).
 - **Critical dylibs**: libllama, libggml, libggml-base, libggml-blas, libggml-cpu, libggml-metal, libggml-rpc, libmtmd — all required for llama-server to run. The download script verifies completeness before skipping.
+- **Dylib naming**: Archive ships versioned symlink chains (e.g., `libggml.dylib` → `libggml.0.dylib` → `libggml.0.9.11.dylib`). The download script flattens these to single `.0.dylib` files (the soname form that the binary actually loads via `@rpath`). This avoids `EEXIST` errors in `@electron/universal`'s ASAR merge when building universal macOS binaries.
 - **MAS**: Entire feature disabled via `process.mas` guard in IPC handlers.
 
 ## License
