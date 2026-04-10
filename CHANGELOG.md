@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.7.1](https://github.com/tc9011/CV-assistant/compare/cv-assistant-v1.7.0...cv-assistant-v1.7.1) (2026-04-10)
+
+
+### Bug Fixes
+
+* **build:** flatten dylib symlinks to avoid @electron/universal EEXIST error ([2d96555](https://github.com/tc9011/CV-assistant/commit/2d96555f802e02a58f95ea75f19c3c6f45639d0f))
+
 ## [1.7.0](https://github.com/tc9011/CV-assistant/compare/cv-assistant-v1.6.5...cv-assistant-v1.7.0) (2026-04-10)
 
 
