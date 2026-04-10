@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.6.2](https://github.com/tc9011/CV-assistant/compare/cv-assistant-v1.6.1...cv-assistant-v1.6.2) (2026-04-10)
+
+
+### Bug Fixes
+
+* **i18n:** localize all hardcoded strings in local LLM settings ([d01cb7f](https://github.com/tc9011/CV-assistant/commit/d01cb7fa40363558dd0763ffd359cbfa13837253))
+* **llm:** verify critical dylibs exist before skipping llama-server download ([13ded13](https://github.com/tc9011/CV-assistant/commit/13ded1378edbc574eda6fee0d97429d1ecb8b286))
+
 ## [1.6.1](https://github.com/tc9011/CV-assistant/compare/cv-assistant-v1.6.0...cv-assistant-v1.6.1) (2026-04-10)
 
 
