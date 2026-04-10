@@ -340,27 +340,33 @@ test.describe('Resumes View', () => {
       })
 
       // "All" tab should show both
-      await expect(window.locator('text=Filter Interview Job')).toBeVisible({ timeout: 5000 })
-      await expect(window.locator('text=Filter Offer Job')).toBeVisible({ timeout: 5000 })
+      await expect(window.locator('text=Filter Interview Job').first()).toBeVisible({
+        timeout: 5000
+      })
+      await expect(window.locator('text=Filter Offer Job').first()).toBeVisible({ timeout: 5000 })
 
       // Click "Interview" tab
       const interviewTab = window.locator('button', { hasText: 'Interview' }).first()
       await expect(interviewTab).toBeVisible({ timeout: 5000 })
       await interviewTab.click()
-      await expect(window.locator('text=Filter Interview Job')).toBeVisible({ timeout: 5000 })
+      await expect(window.locator('text=Filter Interview Job').first()).toBeVisible({
+        timeout: 5000
+      })
       await expect(window.locator('text=Filter Offer Job')).not.toBeVisible({ timeout: 3000 })
 
       // Click "Offer" tab
       const offerTab = window.locator('button', { hasText: 'Offer' }).first()
       await offerTab.click()
-      await expect(window.locator('text=Filter Offer Job')).toBeVisible({ timeout: 5000 })
+      await expect(window.locator('text=Filter Offer Job').first()).toBeVisible({ timeout: 5000 })
       await expect(window.locator('text=Filter Interview Job')).not.toBeVisible({ timeout: 3000 })
 
       // Click "All" tab to reset
       const allTab = window.locator('button', { hasText: 'All' }).first()
       await allTab.click()
-      await expect(window.locator('text=Filter Interview Job')).toBeVisible({ timeout: 5000 })
-      await expect(window.locator('text=Filter Offer Job')).toBeVisible({ timeout: 5000 })
+      await expect(window.locator('text=Filter Interview Job').first()).toBeVisible({
+        timeout: 5000
+      })
+      await expect(window.locator('text=Filter Offer Job').first()).toBeVisible({ timeout: 5000 })
     } finally {
       // Cleanup
       await window.evaluate(
