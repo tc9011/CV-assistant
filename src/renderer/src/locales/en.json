@@ -127,7 +127,7 @@
   "localLlm": {
     "section_title": "Local Model",
     "engine_stopped": "Stopped",
-    "engine_starting": "Starting...",
+    "engine_starting": "Initializing...",
     "engine_running": "Running",
     "engine_error": "Error",
     "download": "Download",
@@ -151,7 +151,11 @@
     "memory_warning_8gb": "Recommended: 8GB+ RAM",
     "memory_warning_16gb": "Recommended: 16GB+ RAM",
     "no_model_test_hint": "Please download a model before testing the connection.",
-    "starting_engine": "Starting local inference engine..."
+    "starting_engine": "Initializing local inference engine...",
+    "start_engine": "Start Engine",
+    "stop_engine": "Stop",
+    "model_desc_e2b": "Smaller model, faster inference. Recommended for 8GB+ RAM.",
+    "model_desc_e4b": "Larger model, better quality. Recommended for 16GB+ RAM."
   },
   "common": {
     "delete": "Delete",

@@ -229,7 +229,7 @@ export function LocalModelSettings(): React.ReactElement {
           )}
           {engineState.status === 'running' && (
             <Button variant="outline" size="sm" onClick={() => handleStopEngine()}>
-              Stop
+              {t('localLlm.stop_engine')}
             </Button>
           )}
         </div>
@@ -278,7 +278,9 @@ export function LocalModelSettings(): React.ReactElement {
                   </div>
                 </div>
 
-                <p className="text-sm text-muted-foreground">{model.description}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t(`localLlm.model_desc_${model.id === 'gemma-4-e2b-it' ? 'e2b' : 'e4b'}`)}
+                </p>
 
                 <div className="mt-2 flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -331,7 +333,7 @@ export function LocalModelSettings(): React.ReactElement {
                         >
                           {engineState.modelId === model.id && engineState.status === 'running'
                             ? t('localLlm.engine_running')
-                            : 'Start Engine'}
+                            : t('localLlm.start_engine')}
                         </Button>
                         <Button
                           variant="destructive"
