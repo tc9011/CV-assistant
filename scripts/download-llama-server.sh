@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Local LLM binaries are macOS-only — skip on Linux/Windows
+if [[ "$(uname -s)" != "Darwin" ]]; then
+  echo "Skipping llama-server download (not macOS)."
+  exit 0
+fi
+
 LLAMA_VERSION="b8740"
 RELEASE_BASE="https://github.com/ggml-org/llama.cpp/releases/download/${LLAMA_VERSION}"
 
