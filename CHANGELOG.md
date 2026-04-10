@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.6.5](https://github.com/tc9011/CV-assistant/compare/cv-assistant-v1.6.4...cv-assistant-v1.6.5) (2026-04-10)
+
+
+### Bug Fixes
+
+* **llm:** skip llama-server download on non-macOS platforms ([ed2da38](https://github.com/tc9011/CV-assistant/commit/ed2da38004c1529159bb52d20f0aabdc15a1bf11))
+
 ## [1.6.4](https://github.com/tc9011/CV-assistant/compare/cv-assistant-v1.6.3...cv-assistant-v1.6.4) (2026-04-10)
 
 
