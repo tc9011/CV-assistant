@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.6.4](https://github.com/tc9011/CV-assistant/compare/cv-assistant-v1.6.3...cv-assistant-v1.6.4) (2026-04-10)
+
+
+### Bug Fixes
+
+* **test:** fix flaky dark theme test by waiting for useEffect to apply class ([ecf2d50](https://github.com/tc9011/CV-assistant/commit/ecf2d500386fc16984c28b58c7fa6fccf3ba060d))
+
 ## [1.6.3](https://github.com/tc9011/CV-assistant/compare/cv-assistant-v1.6.2...cv-assistant-v1.6.3) (2026-04-10)
 
 
