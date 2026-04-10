@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.7.0](https://github.com/tc9011/CV-assistant/compare/cv-assistant-v1.6.5...cv-assistant-v1.7.0) (2026-04-10)
+
+
+### Features
+
+* **llm:** add HuggingFace mirror URL setting for faster model downloads ([53f1145](https://github.com/tc9011/CV-assistant/commit/53f1145f2d9bc96e88db673df9c02ea4cc9a3980))
+
+
+### Bug Fixes
+
+* **e2e:** use .first() in filter test to avoid strict mode violation ([77e3b28](https://github.com/tc9011/CV-assistant/commit/77e3b28d1ff00472678c552271825c5884f3b898))
+
 ## [1.6.5](https://github.com/tc9011/CV-assistant/compare/cv-assistant-v1.6.4...cv-assistant-v1.6.5) (2026-04-10)
 
 
