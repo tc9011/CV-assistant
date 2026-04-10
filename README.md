@@ -2,7 +2,7 @@
 
 English | [中文](./README.zh-CN.md)
 
-AI-powered resume/CV assistant desktop app — generate tailored resumes from your profile using multiple AI providers.
+AI-powered resume/CV assistant desktop app — generate tailored resumes from your profile using multiple AI providers. Includes a built-in local LLM (Gemma 4) for fully offline CV generation.
 
 [![Electron](https://img.shields.io/badge/Electron-39.0.0-blue.svg)](https://www.electronjs.org/)
 [![React](https://img.shields.io/badge/React-19.0.0-blue.svg)](https://react.dev/)
@@ -18,9 +18,18 @@ AI-powered resume/CV assistant desktop app — generate tailored resumes from yo
 ### AI-Powered CV Generation
 
 - Generate tailored resumes from personal profile + job description
-- 12 AI provider support (OpenAI, Anthropic, Google Gemini, DeepSeek, Ollama, OpenRouter, Groq, Mistral, Qwen, Zhipu, Kimi, Custom)
+- 13 AI provider support (OpenAI, Anthropic, Google Gemini, DeepSeek, Ollama, OpenRouter, Groq, Mistral, Qwen, Zhipu, Kimi, Local LLM, Custom)
 - Multi-language CV generation (English, Chinese, Japanese, Korean, French, German, Spanish)
 - Auto-extract keywords from job description alongside CV generation
+
+### Local LLM (Offline Mode)
+
+- Built-in inference engine (llama.cpp) — no external dependencies required
+- Gemma 4 GGUF models: E2B (~5 GB, 8GB+ RAM) and E4B (~5.3 GB, 16GB+ RAM)
+- One-click model download from HuggingFace in Settings
+- Managed engine lifecycle: start, stop, health check, crash recovery
+- Generate resumes completely offline after model download
+- macOS (Apple Silicon & Intel); MAS builds gracefully disable this feature
 
 ### Profile Management
 
@@ -82,6 +91,7 @@ Then try opening the app again.
 | Frontend | React 19, TypeScript 5, Tailwind CSS v4, shadcn/ui, Radix UI |
 | Editor   | Tiptap 3 (ProseMirror-based)                                 |
 | Desktop  | Electron 39, electron-vite 5                                 |
+| Local AI | llama.cpp (llama-server), Gemma 4 GGUF                       |
 | i18n     | i18next, react-i18next                                       |
 | Testing  | Vitest, Testing Library, Playwright                          |
 | Linting  | ESLint 9, Prettier                                           |
@@ -130,9 +140,15 @@ src/
 │   ├── handlers/        # IPC handler modules
 │   │   ├── ai.ts        # AI chat, test, sanitizeApiError
 │   │   ├── cv.ts        # CV CRUD (save, read, list, delete)
+│   │   ├── llm.ts       # Local LLM IPC handlers (engine, download, models)
 │   │   ├── profile.ts   # Profile load/save, PDF text extraction
 │   │   ├── types.ts     # Shared handler types (IpcResult, deps)
 │   │   └── index.ts     # Barrel export + settings, dialog, workspace handlers
+│   ├── llm/             # Local LLM engine & model management
+│   │   ├── types.ts     # Model definitions, engine state types
+│   │   ├── engine.ts    # llama-server process lifecycle
+│   │   ├── download.ts  # GGUF model download manager
+│   │   └── index.ts     # Barrel exports
 │   └── __tests__/       # Main process unit tests
 │       ├── ai.test.ts
 │       ├── cv.test.ts
@@ -158,6 +174,7 @@ src/
         │   │   ├── CvLanguageSelect.tsx  # Language dropdown
         │   │   └── types.ts             # Shared types
         │   ├── ErrorBoundary.tsx
+        │   ├── LocalModelSettings.tsx    # Local LLM model & engine UI
         │   ├── MarkdownEditor.tsx
         │   └── ui/           # shadcn/ui primitives
         ├── context/      # React contexts (Settings, Theme)
@@ -175,6 +192,7 @@ src/
 | Google Gemini   | gemini-3-flash-preview      | No    |
 | DeepSeek        | deepseek-chat               | No    |
 | Ollama          | llama3.2                    | Yes   |
+| Local LLM       | Gemma 4 E2B / E4B           | Yes   |
 | OpenRouter      | anthropic/claude-sonnet-4-6 | No    |
 | Groq            | llama-3.3-70b-versatile     | No    |
 | Mistral         | mistral-large-latest        | No    |

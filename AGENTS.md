@@ -4,7 +4,7 @@
 
 - Name: 简历助手 (CV Assistant)
 - Desktop app: Electron + React + TypeScript
-- Purpose: AI powered resume and CV generation from personal profile using multiple AI providers.
+- Purpose: AI powered resume and CV generation from personal profile using multiple AI providers. Includes a built-in local LLM (Gemma 4 via llama.cpp) for fully offline CV generation.
 - All data stored locally in Electron `app.getPath('userData')/workspace`, no server uploads.
 - Legacy path `~/.cv-assistant/` is auto-migrated on first launch.
 - Cross-platform: Windows, macOS, Linux.
@@ -31,13 +31,14 @@ npm run typecheck    # TypeScript type checks
 Three process Electron architecture:
 
 - **Main process** (`src/main/`): Electron app lifecycle, BrowserWindow creation, IPC handlers, file system operations. Entry: `src/main/index.ts`. File operations: `src/main/fs.ts`. Legacy migration: `src/main/migration.ts`. Shared utilities: `src/main/utils.ts`.
-  - **Handlers** (`src/main/handlers/`): IPC handler modules split by domain. `ai.ts` (AI chat/test + `sanitizeApiError`), `cv.ts` (CV CRUD), `profile.ts` (profile load/save + PDF extraction), `types.ts` (shared types/interfaces), `index.ts` (barrel export + settings/dialog/workspace/version handlers).
+  - **Handlers** (`src/main/handlers/`): IPC handler modules split by domain. `ai.ts` (AI chat/test + `sanitizeApiError`), `cv.ts` (CV CRUD), `llm.ts` (local LLM IPC: engine start/stop, model download/delete/list), `profile.ts` (profile load/save + PDF extraction), `types.ts` (shared types/interfaces), `index.ts` (barrel export + settings/dialog/workspace/version handlers).
+  - **LLM** (`src/main/llm/`): Local LLM engine and model management. `types.ts` (model definitions + `AVAILABLE_MODELS`), `engine.ts` (llama-server child process lifecycle: spawn, health check, stop, crash recovery), `download.ts` (GGUF model download with progress streaming + cancellation), `index.ts` (barrel exports).
 - **Preload** (`src/preload/`): Context bridge exposing safe IPC APIs to renderer. Do not modify `src/preload/index.ts` or `src/preload/index.d.ts` without updating both.
 - **Renderer** (`src/renderer/src/`): React SPA. Pages in `pages/`, shared components in `components/`, contexts in `context/`, utilities in `lib/`, i18n in `locales/`.
   - **Pages** (`src/renderer/src/pages/`): Page-level components — `Profile.tsx`, `Resumes.tsx`, `Settings.tsx`. Each colocated with its `*.test.tsx`.
-  - **Components** (`src/renderer/src/components/`): Shared components. `resume-dialog/` is a folder module containing `ResumeDialog.tsx`, `CvSection.tsx`, `InterviewTimeline.tsx`, `CvLanguageSelect.tsx`, `types.ts`, and an `index.ts` barrel. Also `ErrorBoundary.tsx`, `MarkdownEditor.tsx`, and `ui/` (shadcn/ui primitives).
+  - **Components** (`src/renderer/src/components/`): Shared components. `resume-dialog/` is a folder module containing `ResumeDialog.tsx`, `CvSection.tsx`, `InterviewTimeline.tsx`, `CvLanguageSelect.tsx`, `types.ts`, and an `index.ts` barrel. Also `ErrorBoundary.tsx`, `LocalModelSettings.tsx` (local LLM model download/delete + engine start/stop UI), `MarkdownEditor.tsx`, and `ui/` (shadcn/ui primitives).
 
-IPC Pattern: All external API calls must go through IPC. Renderer invokes via `window.electron.ipcRenderer.invoke()`, main process handles the HTTP call. Never make HTTP requests from the renderer process.
+IPC Pattern: All external API calls must go through IPC. Renderer invokes via `window.electron.ipcRenderer.invoke()`, main process handles the HTTP call. Never make HTTP requests from the renderer process. Local LLM uses the same pattern: renderer sends `llm:*` IPC messages, main process manages the engine subprocess and model files.
 
 ### Security (enforced since v1.0.10)
 
@@ -97,6 +98,7 @@ IPC Pattern: All external API calls must go through IPC. Renderer invokes via `w
 - Workspace files:
   - `profile.json` and `profile.md` for user profile data and Markdown description.
   - `resumes/` for generated resumes, each as `{id}.json` and `{id}.md`.
+- GGUF models: `app.getPath('userData')/models/` (NOT in workspace — models are large and should not be migrated with workspace).
 - Workspace directory is configurable; changing it triggers full data migration.
 - MAS (Mac App Store) builds run inside App Sandbox; the `userData/workspace` path was chosen for sandbox compatibility.
 
@@ -118,6 +120,9 @@ IPC Pattern: All external API calls must go through IPC. Renderer invokes via `w
 - `src/renderer/index.html`: contains CSP header, avoid modifying unless absolutely necessary. If modifying CSP, test both dev and production builds.
 - `src/renderer/src/locales/*.json`: always update both en.json and zh.json together.
 - `src/main/handlers/ai.ts`: contains `sanitizeApiError()` — any new IPC handlers that return errors from AI APIs must use this function.
+- `src/main/llm/types.ts`: contains `AVAILABLE_MODELS` — model definitions (repo, filename, size, quantization). Changes here affect download URLs and UI display.
+- `scripts/download-llama-server.sh`: downloads llama-server binary + dylibs. Runs automatically on `npm install` (postinstall) and `npm run build:mac`. Includes idempotent check for binary AND critical dylibs (libllama, libggml, libmtmd).
+- `electron-builder.yml`: `extraResources` section bundles `llama-server-*` and `lib*.dylib` into the packaged app. Do not remove these entries.
 - `electron-builder.mas.yml`: MAS-specific build config; do not merge into main `electron-builder.yml`.
 - `build/entitlements.mas.plist` and `build/entitlements.mas.inherit.plist`: MAS sandbox entitlements.
 
@@ -126,9 +131,22 @@ IPC Pattern: All external API calls must go through IPC. Renderer invokes via `w
 - Config: `electron-builder.mas.yml` (separate from standard `electron-builder.yml`).
 - Scripts: `npm run build:mas` (production), `npm run build:mas-dev` (development signing).
 - Auto-updater is guarded with `process.mas` check — `electron-updater` is not available in MAS builds.
+- Local LLM is guarded with `process.mas` check — disabled in MAS builds (App Sandbox restrictions).
 - Provisioning profiles, certificates, and private keys (`*.provisionprofile`, `*.p12`, `*.cer`, `*.pem`, `*.key`, `*.pfx`) are gitignored.
 - App Store submission materials are in `docs/`: `app-store-listing.md` (bilingual listing text, keywords, copyright), `privacy-policy.html` (bilingual, hosted on GitHub Pages).
 - Promotional screenshots (2880×1800) are in `tests/screenshots/app-store/` with a Playwright-based generator script at `tests/screenshots/generate-promotional.mjs`.
+
+## Local LLM Architecture
+
+- **Engine**: llama-server (llama.cpp b8740) runs as a managed child process in the main process.
+- **Binary delivery**: `scripts/download-llama-server.sh` auto-downloads the correct platform binary on `npm install` (postinstall). For production builds, `npm run build:mac` downloads both arm64 and x86_64 binaries (`--all-arch` flag).
+- **Binary location (dev)**: `resources/llama-server-{arch}` + `resources/lib*.dylib`. All gitignored.
+- **Binary location (packaged)**: Bundled via `electron-builder.yml` `extraResources` into `process.resourcesPath`.
+- **Model storage**: GGUF files in `app.getPath('userData')/models/`.
+- **IPC channels**: `llm:listModels`, `llm:downloadModel`, `llm:cancelDownload`, `llm:deleteModel`, `llm:startEngine`, `llm:stopEngine`, `llm:engineStatus`. Download progress sent via `llm:downloadProgress` event.
+- **AI integration**: When provider is `local`, `src/main/index.ts` overrides `baseUrl` to `http://127.0.0.1:{enginePort}/v1`. The `ai.ts` handler's response parser falls back to `reasoning_content` when `content` is empty (Gemma 4 thinking model behavior).
+- **Critical dylibs**: libllama, libggml, libggml-base, libggml-blas, libggml-cpu, libggml-metal, libggml-rpc, libmtmd — all required for llama-server to run. The download script verifies completeness before skipping.
+- **MAS**: Entire feature disabled via `process.mas` guard in IPC handlers.
 
 ## License
 

@@ -2,7 +2,7 @@
 
 [English](./README.md) | 中文
 
-基于 AI 的简历生成桌面应用 — 通过个人档案和职位描述，一键生成定制化简历，支持多家 AI 服务商。
+基于 AI 的简历生成桌面应用 — 通过个人档案和职位描述，一键生成定制化简历，支持多家 AI 服务商。内置本地大模型（Gemma 4），支持完全离线生成简历。
 
 [![Electron](https://img.shields.io/badge/Electron-39.0.0-blue.svg)](https://www.electronjs.org/)
 [![React](https://img.shields.io/badge/React-19.0.0-blue.svg)](https://react.dev/)
@@ -18,9 +18,18 @@
 ### AI 简历生成
 
 - 基于 AI 的简历生成：输入个人资料 + 目标职位描述，自动生成匹配的简历
-- 支持 12 家 AI 服务商（OpenAI、Anthropic、Google Gemini、DeepSeek、Ollama、OpenRouter、Groq、Mistral、通义千问、智谱、Kimi、自定义）
+- 支持 13 家 AI 服务商（OpenAI、Anthropic、Google Gemini、DeepSeek、Ollama、OpenRouter、Groq、Mistral、通义千问、智谱、Kimi、本地大模型、自定义）
 - 多语言简历生成（英文、中文、日文、韩文、法文、德文、西班牙文）
 - 自动从职位描述中提取关键词，与简历生成同步进行
+
+### 本地大模型（离线模式）
+
+- 内置推理引擎（llama.cpp）— 无需安装任何外部依赖
+- Gemma 4 GGUF 模型：E2B（约 5 GB，建议 8GB+ 内存）和 E4B（约 5.3 GB，建议 16GB+ 内存）
+- 在设置中一键下载模型
+- 引擎生命周期管理：启动、停止、健康检查、崩溃恢复
+- 下载模型后即可完全离线生成简历
+- macOS（Apple Silicon 和 Intel）；Mac App Store 版本中已优雅禁用
 
 ### 个人资料管理
 
@@ -82,6 +91,7 @@ xattr -cr /Applications/CV-Assistant.app
 | 前端     | React 19、TypeScript 5、Tailwind CSS v4、shadcn/ui、Radix UI |
 | 编辑器   | Tiptap 3（基于 ProseMirror）                                 |
 | 桌面端   | Electron 39、electron-vite 5                                 |
+| 本地 AI  | llama.cpp（llama-server）、Gemma 4 GGUF                      |
 | 国际化   | i18next、react-i18next                                       |
 | 测试     | Vitest、Testing Library、Playwright                          |
 | 代码规范 | ESLint 9、Prettier                                           |
@@ -130,9 +140,15 @@ src/
 │   ├── handlers/        # IPC 处理模块
 │   │   ├── ai.ts        # AI 对话、测试、API 密钥脱敏
 │   │   ├── cv.ts        # 简历 CRUD（保存、读取、列表、删除）
+│   │   ├── llm.ts       # 本地大模型 IPC 处理（引擎、下载、模型管理）
 │   │   ├── profile.ts   # 个人资料加载/保存、PDF 文本提取
 │   │   ├── types.ts     # 共享类型（IpcResult、依赖注入）
 │   │   └── index.ts     # 统一导出 + 设置、对话框、工作目录处理
+│   ├── llm/             # 本地大模型引擎与模型管理
+│   │   ├── types.ts     # 模型定义、引擎状态类型
+│   │   ├── engine.ts    # llama-server 进程生命周期
+│   │   ├── download.ts  # GGUF 模型下载管理器
+│   │   └── index.ts     # 统一导出
 │   └── __tests__/       # 主进程单元测试
 │       ├── ai.test.ts
 │       ├── cv.test.ts
@@ -158,6 +174,7 @@ src/
         │   │   ├── CvLanguageSelect.tsx  # 语言下拉选择
         │   │   └── types.ts             # 共享类型
         │   ├── ErrorBoundary.tsx
+        │   ├── LocalModelSettings.tsx    # 本地大模型管理 UI
         │   ├── MarkdownEditor.tsx
         │   └── ui/           # shadcn/ui 基础组件
         ├── context/      # React 上下文（设置、主题）
@@ -175,6 +192,7 @@ src/
 | Google Gemini | gemini-3-flash-preview      | 否       |
 | DeepSeek      | deepseek-chat               | 否       |
 | Ollama        | llama3.2                    | 是       |
+| 本地大模型    | Gemma 4 E2B / E4B           | 是       |
 | OpenRouter    | anthropic/claude-sonnet-4-6 | 否       |
 | Groq          | llama-3.3-70b-versatile     | 否       |
 | Mistral       | mistral-large-latest        | 否       |
