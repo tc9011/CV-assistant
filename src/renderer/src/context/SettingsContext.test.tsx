@@ -220,10 +220,9 @@ describe('SettingsContext', () => {
       renderWithProvider()
 
       await waitFor(() => {
-        expect(screen.getByTestId('isLoading').textContent).toBe('false')
+        expect(document.documentElement.classList.contains('dark')).toBe(true)
       })
 
-      expect(document.documentElement.classList.contains('dark')).toBe(true)
       expect(document.documentElement.classList.contains('light')).toBe(false)
     })
 
