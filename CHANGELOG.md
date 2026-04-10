@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.6.3](https://github.com/tc9011/CV-assistant/compare/cv-assistant-v1.6.2...cv-assistant-v1.6.3) (2026-04-10)
+
+
+### Bug Fixes
+
+* **llm:** use app.isPackaged instead of NODE_ENV for production detection ([f42b689](https://github.com/tc9011/CV-assistant/commit/f42b689f8effae35dd3554772eef6912423e87f9))
+
 ## [1.6.2](https://github.com/tc9011/CV-assistant/compare/cv-assistant-v1.6.1...cv-assistant-v1.6.2) (2026-04-10)
 
 
